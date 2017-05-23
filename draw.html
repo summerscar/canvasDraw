@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/vue/2.3.3/vue.min.js"></script>
+    <link href="https://cdn.bootcss.com/element-ui/1.3.2/theme-default/index.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/element-ui/1.3.2/index.js"></script>
+    <style>
+        *{padding: 0;margin: 0;}
+
+        #canvas{
+            border:1px solid #8492A6;
+            display: inline-block;
+        }
+    </style>
+
+</head>
+<body>
+<div id="app" >
+    <div style="text-align: center;width:800px;margin: 10px auto; ">
+            <canvas  id="canvas" height="500px" width="800px"></canvas>
+
+            <div style="display: inline-block;margin: 20px 0;">
+            <div style="width: 800px;height:120px;display: flex; flex-wrap: wrap;justify-content:space-around;">
+                <div class="block" style="display: inline-block">
+                    <span class="demonstration">画笔颜色</span>
+                    <el-color-picker v-model="color1" @change="show1"></el-color-picker>
+                </div>
+                <div class="block" style="display: inline-block">
+                    <span class="demonstration">背景颜色</span>
+                    <el-color-picker v-model="color2" @change="show2"></el-color-picker>
+                </div>
+                <el-button type="success"  style="height: 45px;width:  85px" id="clear">{{pen}}</el-button>
+                <el-button  type="danger" @click="clear" style="height: 45px;width: 85px">清空画板</el-button>
+                <div style="display:inline-block;width: 500px">
+                    <span class="demonstration">设置笔画/橡皮擦大小</span>
+                    <el-slider v-model="value1" :min=min :max=max :show-input=true  :show-input-controls=false @change="changeSize"></el-slider>
+                </div>
+            </div>
+
+            </div>
+    </div>
+</div>
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                    min:1,
+                    max:50,
+                    color1: '#66ccff',
+                    color2:  '#ffffff',
+                    value1: 3,
+                    pen:'橡皮擦'
+
+            },
+            methods:{
+                show1:function () {
+                    var canvas = document.getElementById("canvas");
+                    var cobj=canvas.getContext("2d");
+                    cobj.strokeStyle=this.color1;
+                },
+                show2:function () {
+                    var canvas = document.getElementById("canvas");
+                    var cobj=canvas.getContext("2d");
+                    canvas.style.background=this.color2;
+                },
+                changeSize:function () {
+                    var canvas = document.getElementById("canvas");
+                    var cobj=canvas.getContext("2d");
+                    cobj.lineWidth=this.value1;
+                },
+                clear:function () {
+                    var canvas = document.getElementById("canvas");
+                    var cobj=canvas.getContext("2d");
+                    cobj.clearRect(0,0,window.innerWidth,window.innerHeight)
+                },
+                mounted:function () {
+
+                }
+            }
+        });
+        window.onload=function () {
+
+            var mx,my,mx_1,my_1;
+            var canvas = document.getElementById("canvas");
+            var cobj=canvas.getContext("2d");
+            var clear=document.getElementById("clear");
+            var ifclean=true;
+
+
+            canvas.style.background="#fff";
+            cobj.lineWidth=3;
+            cobj.strokeStyle='#66ccff';
+
+            canvas.onmousedown=function (event) {
+                var e = event || window.event;
+                mx=e.clientX-canvas.offsetLeft;
+                my=e.clientY-canvas.offsetTop;
+
+                cobj.beginPath();
+                cobj.moveTo(mx,my);
+
+                canvas.onmousemove=function (event) {
+                    var e = event || window.event;
+                    mx_1=e.clientX-canvas.offsetLeft;
+                    my_1=e.clientY-canvas.offsetTop;
+
+
+
+                    cobj.lineTo(mx_1,my_1);
+                    cobj.stroke();
+                };
+
+                canvas.onmouseup=function () {
+                    canvas.onmousemove=null;
+
+                };
+            };
+
+//橡皮擦
+            clear.onclick=function () {
+                if(ifclean){
+                cobj.save();
+                cobj.strokeStyle='#ffffff';
+                app.pen='画笔';
+                ifclean=false;
+                }
+                else {
+                    cobj.restore();
+                    app.pen='橡皮擦';
+                    ifclean=true;
+                }
+
+            }
+        }
+    </script>
+</body>
+</html>
